@@ -62,7 +62,7 @@ addEventListener('load', function () {
         constructor(game) {
             this.game = game;
             this.spriteImage = new Image();
-            this.spriteImage.src = '../img/player.png';
+            this.spriteImage.src = './img/player.png';
             this.position = {
                 x: 20,
                 y: 20
@@ -191,7 +191,7 @@ addEventListener('load', function () {
     class Angler1 extends Enemey {
         constructor(game) {
             super(game)
-            this.spriteImage.src = '../img/angler1.png';
+            this.spriteImage.src = './img/angler1.png';
             this.bottomMagin = this.game.player.sprite.height * 0.25;
             this.sprite.width = 228;
             this.sprite.height = 169;
@@ -205,7 +205,7 @@ addEventListener('load', function () {
     class Angler2 extends Enemey {
         constructor(game) {
             super(game)
-            this.spriteImage.src = '../img/angler2.png';
+            this.spriteImage.src = './img/angler2.png';
             this.bottomMagin = this.game.player.sprite.height * 0.25;
             this.sprite.width = 213;
             this.sprite.height = 165;
@@ -219,7 +219,7 @@ addEventListener('load', function () {
     class Lucky extends Enemey {
         constructor(game) {
             super(game)
-            this.spriteImage.src = '../img/lucky.png';
+            this.spriteImage.src = './img/lucky.png';
             this.bottomMagin = this.game.player.sprite.height * 0.25;
             this.sprite.width = 99;
             this.sprite.height = 95;
@@ -264,19 +264,19 @@ addEventListener('load', function () {
             this.game = game;
             // Create Layers
             this.image1 = new Image();
-            this.image1.src = '../img/layer1.png';
+            this.image1.src = './img/layer1.png';
             this.layer1 = new Layer(this.game, this.image1, 0.02);
 
             this.image2 = new Image();
-            this.image2.src = '../img/layer2.png';
+            this.image2.src = './img/layer2.png';
             this.layer2 = new Layer(this.game, this.image2, 0.04);
 
             this.image3 = new Image();
-            this.image3.src = '../img/layer3.png';
+            this.image3.src = './img/layer3.png';
             this.layer3 = new Layer(this.game, this.image3, 0.1);
 
             this.image4 = new Image();
-            this.image4.src = '../img/layer4.png';
+            this.image4.src = './img/layer4.png';
             this.layer4 = new Layer(this.game, this.image4, 0.14);
 
             this.layers = [this.layer1, this.layer2, this.layer3];
