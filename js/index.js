@@ -1,4 +1,4 @@
-
+addEventListener('load', function () {
     const canvas = document.getElementById('canvas1');
     canvas.width = 700;
     canvas.height = 500;
@@ -437,3 +437,4 @@
         requestAnimationFrame(animate);
     }
     animate(0);
+});
