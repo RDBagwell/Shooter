@@ -31,6 +31,8 @@ addEventListener('load', function () {
     class Projectile {
         constructor(game, x, y) {
             this.game = game;
+            this.spriteImage = new Image();
+            this.spriteImage.src = './img/projectile.png';
             this.position = {
                 x: x,
                 y: y
@@ -49,8 +51,7 @@ addEventListener('load', function () {
             if (this.position.x > this.game.width * 0.8) this.markedForDeletion = true;
         }
         draw(context) {
-            context.fillStyle = 'yellow';
-            context.fillRect(this.position.x, this.position.y, this.sprite.width, this.sprite.height);
+            context.drawImage(this.spriteImage, this.position.x, this.position.y);
         }
     }
 
@@ -305,7 +306,7 @@ addEventListener('load', function () {
             context.shadowColor = 'black';
             // Timer
             let formateTime = ((this.game.timeLimit - this.game.gameTime) * 0.001).toFixed(0);
-            if(formateTime == -0) formateTime = 0;
+            if(formateTime <= -0) formateTime = 0;
             context.fillText(formateTime, this.game.width * 0.5, 25);
             // Score
             context.fillText(`Score: ${this.game.score}`, 20, 25);
