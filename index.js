@@ -388,7 +388,6 @@ addEventListener('load', function () {
                             if (!this.gameOrver) this.score += enemey.score;
 
                             if (this.score >= this.winningScore) this.gameOrver = true;
-                            console.log(this.gameOrver);
                         }
                     }
                 });
