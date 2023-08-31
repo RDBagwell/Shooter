@@ -56,7 +56,66 @@ addEventListener('load', function () {
     }
 
     class Particle {
+        constructor(game, x, y) {
+            this.game = game;
+            this.x = x;
+            this.y = y;
+            this.spriteImage = new Image();
+            this.spriteImage.src = './img/gears.png';
+            this.sprite = {
+                image: this.spriteImage,
+                frames: {
+                    x: Math.floor(Math.random() * 3),
+                    y: Math.floor(Math.random() * 3)
+                },
+                size: 50
+            }
+            this.sizeModifier = Number((Math.random() * 0.5 + 0.5).toFixed(1));
+            this.size = this.sprite.size + this.sizeModifier;
+            this.speed = {
+                x: Math.random() * 6 - 3,
+                y: Math.random() * -15
+            }
+            this.gravity = 0.5;
+            this.markedForDeletion = false;
+            this.angle = 0;
+            this.va = Math.random() * 0.2 - 0.1;
+            this.bounced = 0;
+            this.bottomBounceBoundary = Math.random() * 80 + 60
+        }
+        update() {
+            this.angle += this.va;
+            this.speed.y += this.gravity;
+            this.x -= this.speed.x + this.game.speed;
+            this.y += this.speed.y;
+            if (this.y > this.game.height + this.size || this.x < 0 - this.size) {
+                this.markedForDeletion = true;
+            }
 
+            if (this.y > this.game.height - this.bottomBounceBoundary && this.bounced < 5) {
+                this.bounced++;
+                this.speed.y *= -0.7;
+            }
+
+
+        }
+        draw(context) {
+            context.save();
+            context.translate(this.x, this.y);
+            context.rotate(this.angle);
+            context.drawImage(
+                this.sprite.image,
+                this.sprite.frames.x * this.sprite.size,
+                this.sprite.frames.y * this.sprite.size,
+                this.sprite.size,
+                this.sprite.size,
+                this.size * -0.5,
+                this.size * -0.5,
+                this.size,
+                this.size
+            );
+            context.restore();
+        }
     }
 
     class Player {
@@ -85,9 +144,10 @@ addEventListener('load', function () {
             }
             this.powerUp = false;
             this.powerUpTimer = 0;
+            this.powerUpLimit = 10000;
             this.projectiles = [];
         }
-        update() {
+        update(deltaTime) {
             // Sprite aniamtion
             (this.sprite.frame.x < this.sprite.frame.maxFrames) ? this.sprite.frame.x++ : this.sprite.frame.x = 0;
 
@@ -103,6 +163,17 @@ addEventListener('load', function () {
             }
             this.position.y += this.speed.y;
 
+            // Power Up
+            if (this.powerUp) {
+                if (this.powerUpTimer >= this.powerUpLimit) {
+                    this.exitPowerUp();
+                } else {
+                    this.powerUpTimer += deltaTime;
+                    this.sprite.frame.y = 1;
+                    this.game.ammo += 0.1;
+                }
+            }
+
             // Handle projectiles
             this.projectiles.forEach(projectile => {
                 projectile.update();
@@ -114,7 +185,9 @@ addEventListener('load', function () {
                 context.fillStyle = "black";
                 context.strokeRect(this.position.x, this.position.y, this.sprite.width, this.sprite.height);
             }
-
+            this.projectiles.forEach(projectile => {
+                projectile.draw(context);
+            });
             context.drawImage(
                 this.sprite.image,
                 this.sprite.frame.x * this.sprite.width,
@@ -127,15 +200,29 @@ addEventListener('load', function () {
                 this.sprite.height
             )
 
-            this.projectiles.forEach(projectile => {
-                projectile.draw(context);
-            });
+
         }
         shootTop() {
             if (this.game.ammo > 0) {
                 this.projectiles.push(new Projectile(this.game, this.position.x + this.sprite.width - 23, this.position.y + 30));
                 this.game.ammo--;
             }
+            if (this.powerUp) this.shootBottom();
+        }
+        shootBottom() {
+            if (this.game.ammo > 0) {
+                this.projectiles.push(new Projectile(this.game, this.position.x + this.sprite.width - 23, this.position.y + 175));
+            }
+        }
+        enterPowerUp() {
+            this.powerUp = true;
+            this.powerUpTimer = 0;
+            if (this.game.ammo < this.game.maxAmmo) this.game.ammo = this.game.maxAmmo;
+        }
+        exitPowerUp() {
+            this.powerUpTimer = 0;
+            this.sprite.frame.y = 0;
+            this.powerUp = false;
         }
     }
 
@@ -193,7 +280,7 @@ addEventListener('load', function () {
         constructor(game) {
             super(game)
             this.spriteImage.src = './img/angler1.png';
-            this.bottomMagin = this.game.player.sprite.height * 0.25;
+            this.bottomMagin = this.game.player.sprite.height * 0.95;
             this.sprite.width = 228;
             this.sprite.height = 169;
             this.position.y = Math.floor(Math.random() * (this.game.height - this.sprite.height - this.bottomMagin));
@@ -207,7 +294,7 @@ addEventListener('load', function () {
         constructor(game) {
             super(game)
             this.spriteImage.src = './img/angler2.png';
-            this.bottomMagin = this.game.player.sprite.height * 0.25;
+            this.bottomMagin = this.game.player.sprite.height * 0.95;
             this.sprite.width = 213;
             this.sprite.height = 165;
             this.position.y = Math.floor(Math.random() * (this.game.height - this.sprite.height - this.bottomMagin));
@@ -221,7 +308,7 @@ addEventListener('load', function () {
         constructor(game) {
             super(game)
             this.spriteImage.src = './img/lucky.png';
-            this.bottomMagin = this.game.player.sprite.height * 0.25;
+            this.bottomMagin = this.game.player.sprite.height * 0.95;
             this.sprite.width = 99;
             this.sprite.height = 95;
             this.position.y = Math.floor(Math.random() * (this.game.height - this.sprite.height - this.bottomMagin));
@@ -229,6 +316,22 @@ addEventListener('load', function () {
             this.lives = 3;
             this.score = 15;
             this.type = 'lucky';
+        }
+    }
+
+    class Hivewhale extends Enemey {
+        constructor(game) {
+            super(game)
+            this.spriteImage.src = './img/hivewhale.png';
+            this.bottomMagin = this.game.player.sprite.height * 0.95;
+            this.sprite.width = 400;
+            this.sprite.height = 227;
+            this.position.y = Math.floor(Math.random() * (this.game.height - this.sprite.height - this.bottomMagin));
+            this.sprite.frame.y = 0;
+            this.lives = 15;
+            this.score = this.lives;
+            this.type = 'hive';
+            this.speed.x = Math.random() * -1.2 -0.2;
         }
     }
 
@@ -306,7 +409,7 @@ addEventListener('load', function () {
             context.shadowColor = 'black';
             // Timer
             let formateTime = ((this.game.timeLimit - this.game.gameTime) * 0.001).toFixed(0);
-            if(formateTime <= -0) formateTime = 0;
+            if (formateTime <= -0) formateTime = 0;
             context.fillText(formateTime, this.game.width * 0.5, 25);
             // Score
             context.fillText(`Score: ${this.game.score}`, 20, 25);
@@ -348,6 +451,7 @@ addEventListener('load', function () {
             this.winningScore = 100;
             this.keys = [];
             this.enemeis = [];
+            this.paticles = [];
             this.enemeyTimer = 0;
             this.enemeyInterval = 3000;
             this.ammo = 20;
@@ -362,7 +466,7 @@ addEventListener('load', function () {
         }
         update(deltaTime) {
             this.bg.update();
-            this.player.update();
+            this.player.update(deltaTime);
             this.bg.layer4.update();
             if (!this.gameOrver) this.gameTime += deltaTime;
             if (this.gameTime >= this.timeLimit) this.gameOrver = true;
@@ -373,20 +477,30 @@ addEventListener('load', function () {
                 this.ammoTimer += deltaTime;
             }
 
+            this.paticles.forEach(particle => particle.update());
+
+            this.paticles = this.paticles.filter(particle => !particle.markedForDeletion);
+
             this.enemeis.forEach(enemey => {
                 enemey.update();
                 if (this.checkCollision(this.player, enemey)) {
                     enemey.markedForDeletion = true;
+                    this.enemyExplode(enemey);
+                    if (enemey.type == 'lucky') { this.player.enterPowerUp(); } else {
+                        this.score--;
+                        this.player.exitPowerUp();
+                    }
                 }
 
                 this.player.projectiles.forEach(projectile => {
                     if (this.checkCollision(projectile, enemey)) {
                         projectile.markedForDeletion = true;
                         enemey.lives--;
+                        this.paticles.push(new Particle(this, enemey.position.x, enemey.position.y))
                         if (enemey.lives <= 0) {
                             enemey.markedForDeletion = true;
+                            this.enemyExplode(enemey);
                             if (!this.gameOrver) this.score += enemey.score;
-
                             if (this.score >= this.winningScore) this.gameOrver = true;
                         }
                     }
@@ -403,16 +517,18 @@ addEventListener('load', function () {
         draw(context) {
             this.bg.draw(context);
             this.player.draw(context);
-            this.bg.layer4.draw(context);
+            this.paticles.forEach(particle => particle.draw(context));
             this.enemeis.forEach(enemey => {
                 enemey.draw(context);
             });
+            this.bg.layer4.draw(context);
             this.ui.draw(context);
         }
         addEnemy() {
             const randomized = Math.random();
-            if(randomized < 0.3) this.enemeis.push(new Angler1(this));
-            if(randomized < 0.6) this.enemeis.push(new Angler2(this));
+            if (randomized < 0.3) this.enemeis.push(new Angler1(this));
+            if (randomized < 0.6) this.enemeis.push(new Angler2(this));
+            if (randomized < 0.8) this.enemeis.push(new Hivewhale(this));
             else this.enemeis.push(new Lucky(this));
         }
         checkCollision(rec1, rec2) {
@@ -422,6 +538,11 @@ addEventListener('load', function () {
                 rec1.position.y < rec2.position.y + rec2.sprite.height &&
                 rec1.position.y + rec1.sprite.height > rec2.position.y
             );
+        }
+        enemyExplode(enemey, numberOfParticles = 3) {
+            for (let i = 0; i < numberOfParticles; i++) {
+                this.paticles.push(new Particle(this, enemey.position.x + enemey.sprite.width * 0.5, enemey.position.y + enemey.sprite.height * 0.5));
+            }
         }
     }
 
