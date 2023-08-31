@@ -355,6 +355,7 @@ addEventListener('load', function () {
                 this.x,
                 this.y
             );
+            // Add 2nd drawImage add width to loop image.
             context.drawImage(
                 this.image,
                 this.x + this.width,
@@ -417,7 +418,7 @@ addEventListener('load', function () {
             for (let i = 0; i < this.game.ammo; i++) {
                 context.fillRect(10 + 5 * i, this.game.height - 25, 3, 20);
             }
-            // Game Over
+            // Game Over UI
             if (this.game.gameOrver) {
                 context.textAlign = 'center';
                 let message1;
@@ -468,6 +469,7 @@ addEventListener('load', function () {
             this.bg.update();
             this.player.update(deltaTime);
             this.bg.layer4.update();
+            // Game Over
             if (!this.gameOrver) this.gameTime += deltaTime;
             if (this.gameTime >= this.timeLimit) this.gameOrver = true;
             if (this.ammoTimer > this.ammoInterval) {
@@ -476,11 +478,10 @@ addEventListener('load', function () {
             } else {
                 this.ammoTimer += deltaTime;
             }
-
+            // Paticles
             this.paticles.forEach(particle => particle.update());
-
             this.paticles = this.paticles.filter(particle => !particle.markedForDeletion);
-
+            // Enemeis Loop
             this.enemeis.forEach(enemey => {
                 enemey.update();
                 if (this.checkCollision(this.player, enemey)) {
@@ -506,7 +507,9 @@ addEventListener('load', function () {
                     }
                 });
             });
+            // Enemies Delete
             this.enemeis = this.enemeis.filter(enemey => !enemey.markedForDeletion);
+            // Add Enemies if not game orver 
             if (this.enemeyTimer > this.enemeyInterval && !this.gameOrver) {
                 this.addEnemy();
                 this.enemeyTimer = 0;
